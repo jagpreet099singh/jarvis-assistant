@@ -6,348 +6,756 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#080d18">
 <title>JARVIS AI</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-*{box-sizing:border-box}
-body{
- margin:0;background:#080d18;color:#eaf5ff;
- font-family:Arial,sans-serif;min-height:100vh;
- display:flex;flex-direction:column;
+* {
+    box-sizing: border-box;
 }
-header{
- padding:22px;text-align:center;
- border-bottom:1px solid #172b40;
+
+body {
+    margin: 0;
+    background: #080d18;
+    color: #eaf5ff;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
-h1{letter-spacing:8px;color:#55caff;margin:8px}
-header p{color:#8199ad;font-size:12px}
-main{
- width:100%;max-width:650px;margin:auto;
- padding:20px;flex:1;display:flex;
- flex-direction:column;gap:20px;
+
+header {
+    padding: 22px;
+    text-align: center;
+    border-bottom: 1px solid #172b40;
 }
-.orb{
- width:135px;height:135px;border-radius:50%;
- margin:25px auto 5px;
- border:2px solid #38bdf8;
- box-shadow:0 0 25px #168acb, inset 0 0 25px #168acb;
- display:grid;place-items:center;
- color:#72d8ff;font-size:38px;
+
+h1 {
+    letter-spacing: 8px;
+    color: #55caff;
+    margin: 8px;
 }
-.status{text-align:center;color:#65c9ff;font-size:13px}
-#chat{
- flex:1;min-height:180px;max-height:42vh;
- overflow-y:auto;display:flex;flex-direction:column;gap:12px;
+
+header p {
+    color: #8199ad;
+    font-size: 12px;
 }
-.message{
- padding:13px 16px;border-radius:14px;
- max-width:88%;line-height:1.5;font-size:14px;
+
+main {
+    width: 100%;
+    max-width: 650px;
+    margin: auto;
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
-.bot{background:#12243a;align-self:flex-start}
-.user{background:#075985;align-self:flex-end}
-.controls{display:flex;gap:9px}
-input{
- flex:1;min-width:0;background:#101d2c;
- border:1px solid #29435d;border-radius:12px;
- color:white;padding:14px;font-size:14px;
+
+#authBox {
+    background: #12243a;
+    border: 1px solid #29435d;
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
 }
-button{
- border:0;border-radius:12px;padding:13px;
- background:#087eae;color:white;font-weight:bold;
+
+#authBox h2 {
+    color: #55caff;
+    letter-spacing: 3px;
 }
-button:active{opacity:.7}
-.mic{background:#153b58}
-footer{text-align:center;color:#62798c;font-size:11px;padding:18px}
+
+.auth-input {
+    width: 100%;
+    margin: 8px 0;
+    background: #080d18;
+    border: 1px solid #29435d;
+    border-radius: 10px;
+    color: white;
+    padding: 13px;
+    font-size: 14px;
+}
+
+button {
+    border: 0;
+    border-radius: 10px;
+    padding: 13px;
+    background: #087eae;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.auth-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+#authStatus {
+    color: #8bdcff;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.orb {
+    width: 135px;
+    height: 135px;
+    border-radius: 50%;
+    margin: 25px auto 5px;
+    border: 2px solid #38bdf8;
+    box-shadow: 0 0 25px #168acb,
+                inset 0 0 25px #168acb;
+    display: grid;
+    place-items: center;
+    color: #72d8ff;
+    font-size: 38px;
+}
+
+.status {
+    text-align: center;
+    color: #65c9ff;
+    font-size: 13px;
+}
+
+#chat {
+    flex: 1;
+    min-height: 180px;
+    max-height: 42vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.message {
+    padding: 13px 16px;
+    border-radius: 14px;
+    max-width: 88%;
+    line-height: 1.5;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.bot {
+    background: #12243a;
+    align-self: flex-start;
+}
+
+.user {
+    background: #075985;
+    align-self: flex-end;
+}
+
+.controls {
+    display: flex;
+    gap: 9px;
+}
+
+#input {
+    flex: 1;
+    min-width: 0;
+    background: #101d2c;
+    border: 1px solid #29435d;
+    border-radius: 12px;
+    color: white;
+    padding: 14px;
+    font-size: 14px;
+}
+
+.mic {
+    background: #153b58;
+}
+
+footer {
+    text-align: center;
+    color: #62798c;
+    font-size: 11px;
+    padding: 18px;
+}
 </style>
 </head>
+
 <body>
+
 <header>
- <h1>JARVIS</h1>
- <p>PERSONAL AI ASSISTANT</p>
+    <h1>JARVIS</h1>
+    <p>PERSONAL AI ASSISTANT</p>
 </header>
 
 <main>
- <div class="orb">✦</div>
- <div class="status" id="status">SYSTEM ONLINE · INTERFACE READY</div>
 
- <div id="chat">
-  <div class="message bot">
-   Hello! I am Jarvis. My interface is ready.
-   My AI connection is not configured yet.
-  </div>
- </div>
+    <section id="authBox">
+        <h2>JARVIS LOGIN</h2>
 
- <div class="controls">
-  <input id="input" placeholder="Talk to Jarvis..." />
-  <button onclick="send()">SEND</button>
-  <button class="mic" onclick="listen()">🎙</button>
- </div>
+        <input
+            id="email"
+            class="auth-input"
+            type="email"
+            placeholder="Email address"
+            autocomplete="email"
+        >
+
+        <input
+            id="password"
+            class="auth-input"
+            type="password"
+            placeholder="Password"
+            autocomplete="current-password"
+        >
+
+        <div class="auth-buttons">
+            <button id="signupButton">Create Account</button>
+            <button id="loginButton">Login</button>
+            <button id="logoutButton" hidden>Logout</button>
+        </div>
+
+        <p id="authStatus">Connect to Jarvis using your email.</p>
+    </section>
+
+    <button id="newChatButton" hidden>+ New Chat</button>
+
+    <div class="orb">✦</div>
+
+    <div class="status" id="status">
+        SYSTEM ONLINE · INTERFACE READY
+    </div>
+
+    <div id="chat">
+        <div class="message bot">
+            Hello! I am Jarvis. My interface is ready.
+        </div>
+    </div>
+
+    <div class="controls" id="controls" hidden>
+        <input id="input" placeholder="Talk to Jarvis...">
+        <button id="sendButton">SEND</button>
+        <button class="mic" id="micButton">🎙</button>
+    </div>
+
 </main>
 
 <footer>JARVIS · PERSONAL PROJECT</footer>
 
 <script>
-const chat=document.getElementById("chat");
-const input=document.getElementById("input");
-const statusText=document.getElementById("status");
 
-function message(text,type){
- const div=document.createElement("div");
- div.className="message "+type;
- div.textContent=text;
- chat.appendChild(div);
- chat.scrollTop=chat.scrollHeight;
+// =====================================
+// 1. SUPABASE CONNECTION
+// =====================================
+
+const JARVIS_SUPABASE_URL =
+    "https://dgckoxzkjcghiegghhup.supabase.co";
+
+const JARVIS_SUPABASE_KEY =
+    "sb_publishable_F944js26x6rQh9Z5idf5tQ_qiU1sZPi";
+
+if (!window.supabase) {
+    throw new Error("Supabase library failed to load.");
 }
 
-function send(){
- const text=input.value.trim();
- if(!text)return;
- message(text,"user");
- input.value="";
- message("Your message has been received. The cloud AI brain will be connected in the next development step.","bot");
+const jarvisSupabase = window.supabase.createClient(
+    JARVIS_SUPABASE_URL,
+    JARVIS_SUPABASE_KEY
+);
+
+
+// =====================================
+// 2. ELEMENTS
+// =====================================
+
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+
+const signupButton = document.getElementById("signupButton");
+const loginButton = document.getElementById("loginButton");
+const logoutButton = document.getElementById("logoutButton");
+const newChatButton = document.getElementById("newChatButton");
+
+const authStatus = document.getElementById("authStatus");
+const controls = document.getElementById("controls");
+
+const chat = document.getElementById("chat");
+const input = document.getElementById("input");
+const statusText = document.getElementById("status");
+
+const sendButton = document.getElementById("sendButton");
+const micButton = document.getElementById("micButton");
+
+let currentUser = null;
+let currentConversationId = null;
+
+
+// =====================================
+// 3. CHAT DISPLAY
+// =====================================
+
+function addMessage(text, type) {
+    const div = document.createElement("div");
+
+    div.className = "message " + type;
+    div.textContent = text;
+
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
 }
 
-input.addEventListener("keydown",e=>{
- if(e.key==="Enter")send();
-});
-
-function listen(){
- const SpeechRecognition=
- window.SpeechRecognition||window.webkitSpeechRecognition;
-
- if(!SpeechRecognition){
-  statusText.textContent="VOICE INPUT NOT SUPPORTED IN THIS BROWSER";
-  return;
- }
-
- const recognition=new SpeechRecognition();
- recognition.lang="en-IN";
- recognition.onstart=()=>{
-  statusText.textContent="LISTENING...";
- };
- recognition.onresult=e=>{
-  input.value=e.results[0][0].transcript;
-  statusText.textContent="VOICE RECEIVED";
-  send();
- };
- recognition.onerror=()=>{
-  statusText.textContent="VOICE INPUT ERROR";
- };
- recognition.onend=()=>{
-  if(statusText.textContent==="LISTENING...")
-   statusText.textContent="SYSTEM ONLINE";
- };
- recognition.start();
+function clearChat() {
+    chat.replaceChildren();
 }
 
-// JARVIS - SUPABASE CONNECTION
 
-const JARVIS_SUPABASE_URL = "https://dgckoxzkjcghiegghhup.supabase.co"
-// JARVIS - EMAIL AUTHENTICATION
+// =====================================
+// 4. CREATE A NEW CONVERSATION
+// =====================================
 
-(function initializeJarvisAuth() {
-    let attempts = 0;
+async function createConversation() {
 
-    const waitForSupabase = setInterval(() => {
-        attempts++;
+    const { data, error } = await jarvisSupabase
+        .from("conversations")
+        .insert({
+            title: "New chat"
+        })
+        .select("id")
+        .single();
 
-        if (!window.jarvisSupabase) {
-            if (attempts >= 100) {
-                clearInterval(waitForSupabase);
-                console.error("Jarvis: Supabase connection not found.");
-            }
+    if (error) {
+        authStatus.textContent =
+            "Could not create conversation: " + error.message;
+        return false;
+    }
+
+    currentConversationId = data.id;
+
+    clearChat();
+
+    addMessage(
+        "Hello! I am Jarvis. How can I help you?",
+        "bot"
+    );
+
+    return true;
+}
+
+
+// =====================================
+// 5. LOAD SAVED CHAT
+// =====================================
+
+async function loadConversation() {
+
+    const { data, error } = await jarvisSupabase
+        .from("conversations")
+        .select("id")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    if (error) {
+        authStatus.textContent =
+            "Could not load conversations: " + error.message;
+        return;
+    }
+
+    if (!data) {
+        await createConversation();
+        return;
+    }
+
+    currentConversationId = data.id;
+
+    const { data: messages, error: messageError } =
+        await jarvisSupabase
+            .from("messages")
+            .select("role, content")
+            .eq("conversation_id", currentConversationId)
+            .order("created_at", { ascending: true });
+
+    if (messageError) {
+        authStatus.textContent =
+            "Could not load messages: " + messageError.message;
+        return;
+    }
+
+    clearChat();
+
+    if (!messages || messages.length === 0) {
+        addMessage("Hello! I am Jarvis.", "bot");
+        return;
+    }
+
+    messages.forEach(item => {
+        addMessage(
+            item.content,
+            item.role === "user" ? "user" : "bot"
+        );
+    });
+}
+
+
+// =====================================
+// 6. SAVE CHAT MESSAGES
+// =====================================
+
+async function saveMessage(role, content) {
+
+    if (!currentConversationId) {
+        return false;
+    }
+
+    const { error } = await jarvisSupabase
+        .from("messages")
+        .insert({
+            conversation_id: currentConversationId,
+            role: role,
+            content: content
+        });
+
+    if (error) {
+        authStatus.textContent =
+            "Message could not be saved: " + error.message;
+        return false;
+    }
+
+    return true;
+}
+
+
+// =====================================
+// 7. SIGNED-IN INTERFACE
+// =====================================
+
+async function handleSignedIn(user) {
+
+    if (
+        currentUser &&
+        currentUser.id === user.id &&
+        currentConversationId
+    ) {
+        return;
+    }
+
+    currentUser = user;
+
+    emailInput.hidden = true;
+    passwordInput.hidden = true;
+
+    signupButton.hidden = true;
+    loginButton.hidden = true;
+
+    logoutButton.hidden = false;
+    newChatButton.hidden = false;
+    controls.hidden = false;
+
+    authStatus.textContent =
+        "Signed in as " + user.email;
+
+    statusText.textContent = "JARVIS ACCOUNT CONNECTED";
+
+    await loadConversation();
+}
+
+
+// =====================================
+// 8. SIGNED-OUT INTERFACE
+// =====================================
+
+function handleSignedOut() {
+
+    currentUser = null;
+    currentConversationId = null;
+
+    emailInput.hidden = false;
+    passwordInput.hidden = false;
+
+    signupButton.hidden = false;
+    loginButton.hidden = false;
+
+    logoutButton.hidden = true;
+    newChatButton.hidden = true;
+    controls.hidden = true;
+
+    authStatus.textContent =
+        "Sign in or create an account.";
+
+    statusText.textContent =
+        "PLEASE SIGN IN TO USE JARVIS";
+
+    clearChat();
+
+    addMessage(
+        "Welcome to Jarvis. Please sign in to continue.",
+        "bot"
+    );
+}
+
+
+// =====================================
+// 9. EMAIL REGISTRATION
+// =====================================
+
+signupButton.addEventListener("click", async () => {
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    if (!email || !password) {
+        authStatus.textContent =
+            "Enter your email and password.";
+        return;
+    }
+
+    authStatus.textContent =
+        "Creating your account...";
+
+    signupButton.disabled = true;
+
+    try {
+
+        const { data, error } =
+            await jarvisSupabase.auth.signUp({
+                email: email,
+                password: password
+            });
+
+        if (error) {
+            authStatus.textContent = error.message;
             return;
         }
 
-        clearInterval(waitForSupabase);
-
-        const supabase = window.jarvisSupabase;
-
-        const authBox = document.createElement("div");
-
-        authBox.id = "jarvis-auth";
-        authBox.style.cssText = `
-            max-width: 360px;
-            margin: 30px auto;
-            padding: 20px;
-            border-radius: 12px;
-            background: #171717;
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
-        
-
-        authBox.innerHTML = 
-            <h2>JARVIS LOGIN</h2>
-
-            <input
-                id="jarvis-email"
-                type="email"
-                placeholder="Email address"
-                autocomplete="email"
-                style="width:90%;padding:12px;margin:8px 0;"
-            >
-
-            <input
-                id="jarvis-password"
-                type="password"
-                placeholder="Password"
-                autocomplete="current-password"
-                style="width:90%;padding:12px;margin:8px 0;"
-            >
-
-            <button id="jarvis-signup"
-                style="padding:12px;margin:6px;">
-                Create Account
-            </button>
-
-            <button id="jarvis-login"
-                style="padding:12px;margin:6px;">
-                Login
-            </button>
-
-            <button id="jarvis-logout"
-                style="padding:12px;margin:6px;display:none;">
-                Logout
-            </button>
-
-            <p id="jarvis-auth-status">
-                Sign in or create an account.
-            </p>
-        `;
-
-        document.body.prepend(authBox);
-
-        const emailInput = document.getElementById("jarvis-email");
-        const passwordInput = document.getElementById("jarvis-password");
-        const status = document.getElementById("jarvis-auth-status");
-
-        const signupButton = document.getElementById("jarvis-signup");
-        const loginButton = document.getElementById("jarvis-login");
-        const logoutButton = document.getElementById("jarvis-logout");
-
-        function showStatus(message) {
-            status.textContent = message;
+        if (data.session) {
+            await handleSignedIn(data.user);
+        } else {
+            authStatus.textContent =
+                "Account created. Check your email for confirmation if required.";
         }
 
-        function showSignedIn(user) {
-            emailInput.style.display = "none";
-            passwordInput.style.display = "none";
-            signupButton.style.display = "none";
-            loginButton.style.display = "none";
-            logoutButton.style.display = "inline-block";
+    } catch (error) {
+        authStatus.textContent =
+            "Registration failed. Please try again.";
+    } finally {
+        signupButton.disabled = false;
+    }
 
-            showStatus("Signed in as " + user.email);
-        }
+});
 
-        function showSignedOut() {
-            emailInput.style.display = "inline-block";
-            passwordInput.style.display = "inline-block";
-            signupButton.style.display = "inline-block";
-            loginButton.style.display = "inline-block";
-            logoutButton.style.display = "none";
 
-            showStatus("Sign in or create an account.");
-        }
+// =====================================
+// 10. EMAIL LOGIN
+// =====================================
 
-        signupButton.addEventListener("click", async () => {
-            const email = emailInput.value.trim();
-            const password = passwordInput.value;
+loginButton.addEventListener("click", async () => {
 
-            if (!email || !password) {
-                showStatus("Enter your email and password.");
-                return;
-            }
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
 
-            showStatus("Creating your account...");
+    if (!email || !password) {
+        authStatus.textContent =
+            "Enter your email and password.";
+        return;
+    }
 
-            const { data, error } = await supabase.auth.signUp({
-                email,
-                password
+    authStatus.textContent = "Signing in...";
+
+    loginButton.disabled = true;
+
+    try {
+
+        const { data, error } =
+            await jarvisSupabase.auth.signInWithPassword({
+                email: email,
+                password: password
             });
 
-            if (error) {
-                showStatus(error.message);
-                return;
-            }
+        if (error) {
+            authStatus.textContent = error.message;
+            return;
+        }
 
-            if (data.session) {
-                showSignedIn(data.user);
-            } else {
-                showStatus(
-                    "Account created. Check your email if confirmation is required."
-                );
-            }
-        });
+        await handleSignedIn(data.user);
 
-        loginButton.addEventListener("click", async () => {
-            const email = emailInput.value.trim();
-            const password = passwordInput.value;
+    } catch (error) {
+        authStatus.textContent =
+            "Login failed. Please try again.";
+    } finally {
+        loginButton.disabled = false;
+    }
 
-            if (!email || !password) {
-                showStatus("Enter your email and password.");
-                return;
-            }
+});
 
-            showStatus("Signing in...");
 
-            const { data, error } =
-                await supabase.auth.signInWithPassword({
-                    email,
-                    password
-                });
+// =====================================
+// 11. LOGOUT
+// =====================================
 
-            if (error) {
-                showStatus(error.message);
-                return;
-            }
+logoutButton.addEventListener("click", async () => {
 
-            showSignedIn(data.user);
-        });
+    authStatus.textContent = "Signing out...";
 
-        logoutButton.addEventListener("click", async () => {
-            const { error } = await supabase.auth.signOut();
+    const { error } =
+        await jarvisSupabase.auth.signOut();
 
-            if (error) {
-                showStatus(error.message);
-                return;
-            }
+    if (error) {
+        authStatus.textContent = error.message;
+        return;
+    }
 
-            showSignedOut();
-        });
+    handleSignedOut();
+});
 
-        supabase.auth.onAuthStateChange((event, session) => {
+
+// =====================================
+// 12. NEW CHAT
+// =====================================
+
+newChatButton.addEventListener("click", async () => {
+    await createConversation();
+});
+
+
+// =====================================
+// 13. SEND MESSAGE
+// =====================================
+
+async function send() {
+
+    const text = input.value.trim();
+
+    if (!text || !currentUser || !currentConversationId) {
+        return;
+    }
+
+    input.value = "";
+
+    addMessage(text, "user");
+
+    await saveMessage("user", text);
+
+    const reply =
+        "Your message has been received. My AI brain is not connected yet. This is a placeholder response.";
+
+    addMessage(reply, "bot");
+
+    await saveMessage("assistant", reply);
+}
+
+sendButton.addEventListener("click", send);
+
+input.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+        send();
+    }
+});
+
+
+// =====================================
+// 14. VOICE INPUT
+// =====================================
+
+function listen() {
+
+    const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+        statusText.textContent =
+            "VOICE INPUT NOT SUPPORTED IN THIS BROWSER";
+        return;
+    }
+
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = "en-IN";
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+        statusText.textContent = "LISTENING...";
+    };
+
+    recognition.onresult = event => {
+        input.value =
+            event.results[0][0].transcript;
+
+        statusText.textContent = "VOICE RECEIVED";
+
+        send();
+    };
+
+    recognition.onerror = () => {
+        statusText.textContent = "VOICE INPUT ERROR";
+    };
+
+    recognition.onend = () => {
+        if (statusText.textContent === "LISTENING...") {
+            statusText.textContent =
+                "JARVIS ACCOUNT CONNECTED";
+        }
+    };
+
+    recognition.start();
+}
+
+micButton.addEventListener("click", listen);
+
+
+// =====================================
+// 15. CHECK EXISTING LOGIN SESSION
+// =====================================
+
+async function initializeJarvis() {
+
+    const { data, error } =
+        await jarvisSupabase.auth.getSession();
+
+    if (error) {
+        authStatus.textContent =
+            "Could not check login session: " + error.message;
+        return;
+    }
+
+    if (data.session) {
+        await handleSignedIn(data.session.user);
+    } else {
+        handleSignedOut();
+    }
+
+}
+
+
+// =====================================
+// 16. AUTHENTICATION STATE CHANGES
+// =====================================
+
+jarvisSupabase.auth.onAuthStateChange(
+    (event, session) => {
+
+        setTimeout(() => {
             if (session && session.user) {
-                showSignedIn(session.user);
+                handleSignedIn(session.user);
             } else {
-                showSignedOut();
+                handleSignedOut();
             }
-        });
+        }, 0);
 
-        showStatus("Checking your account...");
-
-    }, 100);
-})();
+    }
+);
 
 
-const JARVIS_SUPABASE_KEY = "sb_publishable_F944js26x6rQh9Z5idf5tQ_qiU1sZPi";
+// =====================================
+// 17. START JARVIS
+// =====================================
 
-const loadSupabase = document.createElement("script");
+initializeJarvis();
 
-loadSupabase.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-
-loadSupabase.onload = () => {
-    window.jarvisSupabase = window.supabase.createClient(
-        JARVIS_SUPABASE_URL,
-        JARVIS_SUPABASE_KEY
-    );
-
-    console.log("JARVIS SUPABASE CONNECTED");
-};
-
-loadSupabase.onerror = () => {
-    console.error("JARVIS SUPABASE FAILED TO LOAD");
-};
-
-document.head.appendChild(loadSupabase);
 </script>
+
 </body>
 </html>
+
