@@ -140,7 +140,193 @@ function listen(){
 
 // JARVIS - SUPABASE CONNECTION
 
-const JARVIS_SUPABASE_URL = "https://dgckoxzkjcghiegghhup.supabase.co";
+const JARVIS_SUPABASE_URL = "https://dgckoxzkjcghiegghhup.supabase.co"
+// JARVIS - EMAIL AUTHENTICATION
+
+(function initializeJarvisAuth() {
+    let attempts = 0;
+
+    const waitForSupabase = setInterval(() => {
+        attempts++;
+
+        if (!window.jarvisSupabase) {
+            if (attempts >= 100) {
+                clearInterval(waitForSupabase);
+                console.error("Jarvis: Supabase connection not found.");
+            }
+            return;
+        }
+
+        clearInterval(waitForSupabase);
+
+        const supabase = window.jarvisSupabase;
+
+        const authBox = document.createElement("div");
+
+        authBox.id = "jarvis-auth";
+        authBox.style.cssText = `
+            max-width: 360px;
+            margin: 30px auto;
+            padding: 20px;
+            border-radius: 12px;
+            background: #171717;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        `;
+
+        authBox.innerHTML = `
+            <h2>JARVIS LOGIN</h2>
+
+            <input
+                id="jarvis-email"
+                type="email"
+                placeholder="Email address"
+                autocomplete="email"
+                style="width:90%;padding:12px;margin:8px 0;"
+            >
+
+            <input
+                id="jarvis-password"
+                type="password"
+                placeholder="Password"
+                autocomplete="current-password"
+                style="width:90%;padding:12px;margin:8px 0;"
+            >
+
+            <button id="jarvis-signup"
+                style="padding:12px;margin:6px;">
+                Create Account
+            </button>
+
+            <button id="jarvis-login"
+                style="padding:12px;margin:6px;">
+                Login
+            </button>
+
+            <button id="jarvis-logout"
+                style="padding:12px;margin:6px;display:none;">
+                Logout
+            </button>
+
+            <p id="jarvis-auth-status">
+                Sign in or create an account.
+            </p>
+        `;
+
+        document.body.prepend(authBox);
+
+        const emailInput = document.getElementById("jarvis-email");
+        const passwordInput = document.getElementById("jarvis-password");
+        const status = document.getElementById("jarvis-auth-status");
+
+        const signupButton = document.getElementById("jarvis-signup");
+        const loginButton = document.getElementById("jarvis-login");
+        const logoutButton = document.getElementById("jarvis-logout");
+
+        function showStatus(message) {
+            status.textContent = message;
+        }
+
+        function showSignedIn(user) {
+            emailInput.style.display = "none";
+            passwordInput.style.display = "none";
+            signupButton.style.display = "none";
+            loginButton.style.display = "none";
+            logoutButton.style.display = "inline-block";
+
+            showStatus("Signed in as " + user.email);
+        }
+
+        function showSignedOut() {
+            emailInput.style.display = "inline-block";
+            passwordInput.style.display = "inline-block";
+            signupButton.style.display = "inline-block";
+            loginButton.style.display = "inline-block";
+            logoutButton.style.display = "none";
+
+            showStatus("Sign in or create an account.");
+        }
+
+        signupButton.addEventListener("click", async () => {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                showStatus("Enter your email and password.");
+                return;
+            }
+
+            showStatus("Creating your account...");
+
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password
+            });
+
+            if (error) {
+                showStatus(error.message);
+                return;
+            }
+
+            if (data.session) {
+                showSignedIn(data.user);
+            } else {
+                showStatus(
+                    "Account created. Check your email if confirmation is required."
+                );
+            }
+        });
+
+        loginButton.addEventListener("click", async () => {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                showStatus("Enter your email and password.");
+                return;
+            }
+
+            showStatus("Signing in...");
+
+            const { data, error } =
+                await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+            if (error) {
+                showStatus(error.message);
+                return;
+            }
+
+            showSignedIn(data.user);
+        });
+
+        logoutButton.addEventListener("click", async () => {
+            const { error } = await supabase.auth.signOut();
+
+            if (error) {
+                showStatus(error.message);
+                return;
+            }
+
+            showSignedOut();
+        });
+
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (session && session.user) {
+                showSignedIn(session.user);
+            } else {
+                showSignedOut();
+            }
+        });
+
+        showStatus("Checking your account...");
+
+    }, 100);
+})();
+;
 
 const JARVIS_SUPABASE_KEY = "sb_publishable_F944js26x6rQh9Z5idf5tQ_qiU1sZPi";
 
