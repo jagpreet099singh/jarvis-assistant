@@ -754,6 +754,131 @@ jarvisSupabase.auth.onAuthStateChange(
 
 initializeJarvis();
 
+
+// JARVIS PASSWORD RECOVERY
+
+(function () {
+    const check = setInterval(() => {
+        const supabase = window.jarvisSupabase;
+        const emailInput = document.querySelector(
+            'input[type="email"]'
+        );
+
+        const loginButton = [...document.querySelectorAll("button")]
+            .find(button =>
+                /create account|login|sign in/i.test(button.textContent)
+            );
+
+        if (!supabase || !emailInput || !loginButton) return;
+
+        clearInterval(check);
+
+        // Forgot password button
+        if (document.getElementById("jarvis-forgot")) return;
+
+        const forgot = document.createElement("button");
+        forgot.id = "jarvis-forgot";
+        forgot.textContent = "Forgot Password?";
+        forgot.style.cssText =
+            "display:block;margin:12px auto;padding:10px 18px;" +
+            "background:transparent;color:#00eaff;" +
+            "border:1px solid #00eaff;border-radius:8px;";
+
+        loginButton.insertAdjacentElement("afterend", forgot);
+
+        forgot.onclick = async () => {
+            const email = emailInput.value.trim();
+
+            if (!email) {
+                alert("Enter your registered email first.");
+                return;
+            }
+
+            forgot.disabled = true;
+            forgot.textContent = "Sending...";
+
+            const { error } =
+                await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo:
+                    "https://jagpreet099singh.github.io/jarvis-assistant/"
+                });
+
+            forgot.disabled = false;
+            forgot.textContent = "Forgot Password?";
+
+            alert(error
+                ? "Error: " + error.message
+                : "Password reset email sent. Check your inbox.");
+        };
+
+        // Password reset panel
+        const panel = document.createElement("div");
+        panel.id = "jarvis-reset-panel";
+
+        panel.style.cssText =
+            "display:none;position:fixed;inset:0;z-index:999999;" +
+            "background:#050b18;color:white;" +
+            "align-items:center;justify-content:center;padding:20px;";
+
+        panel.innerHTML = `
+            <div style="background:#101b30;padding:25px;
+                border-radius:15px;width:100%;max-width:350px;
+                text-align:center;">
+                <h2>JARVIS</h2>
+                <p>Choose your new password</p>
+                <input id="jarvis-new-password"
+                    type="password"
+                    placeholder="New password"
+                    style="width:100%;padding:12px;
+                    box-sizing:border-box;">
+                <button id="jarvis-update-password"
+                    style="margin-top:15px;padding:12px;">
+                    Update Password
+                </button>
+                <p id="jarvis-reset-message"></p>
+            </div>
+        `;
+
+        document.body.appendChild(panel);
+
+        document.getElementById("jarvis-update-password")
+            .onclick = async () => {
+                const password =
+                    document.getElementById("jarvis-new-password").value;
+
+                const message =
+                    document.getElementById("jarvis-reset-message");
+
+                if (password.length < 8) {
+                    message.textContent =
+                        "Password must be at least 8 characters.";
+                    return;
+                }
+
+                const { error } = await supabase.auth.updateUser({
+                    password: password
+                });
+
+                message.textContent = error
+                    ? error.message
+                    : "Password updated successfully!";
+
+                if (!error) {
+                    setTimeout(() => {
+                        panel.style.display = "none";
+                    }, 2000);
+                }
+            };
+
+        // Show panel after recovery link is opened
+        supabase.auth.onAuthStateChange((event) => {
+            if (event === "PASSWORD_RECOVERY") {
+                panel.style.display = "flex";
+            }
+        });
+
+    }, 500);
+})();
 </script>
 
 </body>
